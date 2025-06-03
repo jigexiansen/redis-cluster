@@ -70,6 +70,9 @@ make stop           # ⏹️ 停止集群
 make restart        # 🔄 重启集群
 make status         # 📊 查看集群状态
 make test           # 🧪 测试集群功能
+make connect        # 🔗 连接到Redis集群CLI
+make cluster-info   # 🔍 显示详细集群信息
+make fix-cluster    # 🔧 修复集群连接问题
 make logs           # 📝 查看日志
 make backup         # 💾 备份数据
 make clean          # 🧹 清理环境
@@ -86,6 +89,7 @@ redis-cluster/
 ├── .gitignore                   # Git忽略文件
 ├── scripts/                     # 脚本目录
 │   ├── manage.sh               # 管理脚本（包含自动集群创建）
+│   ├── redis-cli.sh            # Redis CLI连接脚本
 │   ├── setup.sh                # 安装脚本
 │   └── cleanup.sh              # 清理脚本
 ├── docs/                        # 文档目录
