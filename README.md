@@ -1,5 +1,9 @@
 # 🚀 Redis Cluster
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Redis](https://img.shields.io/badge/Redis-7.4-red.svg)](https://redis.io/)
+
 高可用Redis集群解决方案，基于Docker Compose和Bitnami镜像，适用于Mac ARM + Orbstack环境。
 
 ## ✨ 特性
@@ -15,15 +19,17 @@
 
 ### 前置要求
 
-- macOS ARM架构 (M1/M2/M3)
-- Orbstack已安装并运行
-- Docker Compose支持
+- **操作系统**: macOS ARM架构 (M1/M2/M3/M4)
+- **容器环境**: [OrbStack](https://orbstack.dev/) 已安装并运行
+- **Docker**: Docker 20.10+ 和 Docker Compose V2
+- **内存**: 建议4GB+可用内存
+- **端口**: 确保7000-7005、17000-17005、5540、9121端口可用
 
 ### 启动集群
 
 ```bash
 # 克隆项目
-git clone <your-repo-url>
+git clone https://github.com/jigexiansen/redis-cluster.git
 cd redis-cluster
 
 # 启动集群
@@ -36,11 +42,17 @@ make start
 ### 验证集群
 
 ```bash
+# 检查环境
+make setup
+
 # 测试集群功能
 make test
 
 # 查看集群状态
 make status
+
+# 查看详细集群信息
+make cluster-info
 ```
 
 ### 访问服务
@@ -104,14 +116,20 @@ redis-cluster/
 
 ## 💻 示例代码
 
-查看 `examples/` 目录获取各种编程语言的连接示例：
+查看 `examples/` 目录获取各种编程语言的Redis Cluster连接示例：
 
-- [☕ Java示例](examples/java/)
-- [🟢 Node.js示例](examples/nodejs/)
-- [🐍 Python示例](examples/python/)
-- [🔵 Go示例](examples/go/)
-- [💠 C#示例](examples/csharp/)
-- [🐘 PHP示例](examples/php/)
+- [☕ Java示例](examples/java/) - 基于Jedis客户端
+- [🟢 Node.js示例](examples/nodejs/) - 基于redis客户端
+- [🐍 Python示例](examples/python/) - 基于redis-py-cluster
+- [🔵 Go示例](examples/go/) - 基于go-redis/v9
+- [💠 C#示例](examples/csharp/) - 基于StackExchange.Redis
+- [🐘 PHP示例](examples/php/) - 基于Predis客户端
+
+每个示例都包含：
+- ✅ 完整的连接配置
+- 📝 基础CRUD操作演示
+- 🔢 计数器和队列操作
+- 🗂️ 高级数据结构使用
 
 ## 🤝 贡献
 
@@ -121,9 +139,24 @@ redis-cluster/
 
 本项目采用 [MIT许可证](LICENSE)。
 
+## 🔧 故障排除
+
+遇到问题？查看常见解决方案：
+
+- 🚨 [常见问题解答](docs/troubleshooting.md)
+- 🐳 [Docker相关问题](docs/troubleshooting.md#docker-issues)
+- 🔌 [连接问题](docs/troubleshooting.md#connection-issues)
+- 📊 [性能优化](docs/troubleshooting.md#performance-tuning)
+
 ## ⭐ 支持
 
 如果这个项目对你有帮助，请给我们一个Star！
+
+### 🤝 社区
+
+- 💬 [提交问题](https://github.com/jigexiansen/redis-cluster/issues)
+- 🔄 [贡献代码](https://github.com/jigexiansen/redis-cluster/pulls)
+- 📖 [查看文档](docs/)
 
 ---
 
