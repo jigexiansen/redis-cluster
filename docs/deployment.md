@@ -1,132 +1,239 @@
-# 🚀 Redis Cluster部署提示词
+# 📖 Redis Cluster 部署指南
 
-## 📋 需求描述
+## 🎯 部署概述
 
-在Mac ARM架构环境下，使用Orbstack创建Redis Cluster：
+本项目提供基于官方Redis镜像的高可用Redis集群解决方案，采用**独立节点启动 + 自动集群创建**的方式，确保部署稳定可靠。
 
-### 🖥️ 基础环境
-- Mac ARM架构（M1/M2/M3等）
-- Orbstack已安装并启动
-- 目标目录：`/Users/staff/Services/redis-cluster`
+## 🏗️ 架构说明
 
-### 🏗️ 核心架构要求
-1. **🔗 Redis Cluster模式**（非主从复制）
-   - 6节点集群：3主3从
-   - 数据自动分片到16384个槽位
-   - 自动故障转移和负载均衡
-   - 端口：7000-7005 + 集群总线端口17000-17005
+### 📦 技术栈
+- **Redis版本**: 7.4 (官方镜像)
+- **容器编排**: Docker Compose
+- **网络**: 自定义bridge网络
+- **数据持久化**: Docker卷 + AOF/RDB
 
-2. **🐳 镜像选择**
-   - 使用Bitnami Redis Cluster镜像：`bitnami/redis-cluster:7.4`
-   - 自动集群初始化和管理
-   - 生产级配置
+### 🔧 集群配置
+- **节点数量**: 6个（3主3从）
+- **数据分片**: 16384个槽位
+- **故障转移**: 自动
+- **密码认证**: 启用
 
-3. **🔒 安全配置**
-   - 密码认证保护：`redis123456`
-   - 数据持久化存储（自动RDB + AOF）
-   - 网络隔离和访问控制
+## 🚀 快速部署
 
-### 🛠️ 管理和监控工具
-1. **🎯 管理界面**
-   - Redis Insight - 端口5540
-   - 官方可视化管理工具
+### 1. 环境准备
 
-2. **📊 监控体系**
-   - Redis Exporter监控 - 端口9121
-   - 支持Prometheus指标收集
-   - 可扩展Grafana仪表板
+#### 系统要求
+- **操作系统**: macOS ARM (推荐) 或 Linux/Windows
+- **内存**: 最少4GB可用内存
+- **硬盘**: 最少10GB可用空间
 
-3. **💻 开发支持**
-   - 多语言连接示例（Java、Node.js、Python、Go、C#）
-   - 集群模式客户端配置
-   - 详细使用文档
+#### 软件依赖
+```bash
+# 检查Docker版本
+docker --version  # 需要 20.10+
 
-### 技术实现要求
+# 检查Docker Compose版本  
+docker-compose --version  # 需要 V2
 
-#### 1. Docker Compose配置
-创建 `docker-compose.yml`：
+# 检查端口占用
+lsof -i :7000-7005
+lsof -i :17000-17005
+lsof -i :5540,9121
+```
+
+### 2. 获取项目
+
+```bash
+# 克隆项目
+git clone https://github.com/jigexiansen/redis-cluster.git
+cd redis-cluster
+
+# 检查环境
+make setup
+```
+
+### 3. 一键部署
+
+```bash
+# 启动集群（包含自动创建集群）
+make start
+```
+
+### 4. 验证部署
+
+```bash
+# 检查集群状态
+make status
+
+# 查看详细信息
+make cluster-info
+
+# 测试集群功能
+make test
+```
+
+## 🔧 详细部署流程
+
+### 阶段1: 容器启动
+```bash
+# Docker Compose启动6个Redis节点
+docker-compose up -d
+
+# 每个节点配置：
+# - 独立Redis实例
+# - 启用集群模式
+# - 密码认证
+# - 数据持久化
+```
+
+### 阶段2: 等待就绪
+```bash
+# 等待所有节点完全启动
+sleep 15
+
+# 健康检查确认节点状态
+# healthcheck: redis-cli ping
+```
+
+### 阶段3: 集群检测
+```bash
+# 检查是否已有集群配置
+cluster_state=$(docker exec redis-node-0 redis-cli -a redis123456 -c cluster info 2>/dev/null | grep "cluster_state:ok")
+```
+
+### 阶段4: 自动创建集群
+```bash
+# 如果无集群，自动创建
+if [ -z "$cluster_state" ]; then
+    docker exec redis-node-0 redis-cli -a redis123456 --cluster create \
+        redis-node-0:6379 redis-node-1:6379 redis-node-2:6379 \
+        redis-node-3:6379 redis-node-4:6379 redis-node-5:6379 \
+        --cluster-replicas 1 --cluster-yes
+fi
+```
+
+### 阶段5: 状态验证
+```bash
+# 确认集群状态正常
+# cluster_state:ok
+# cluster_slots_assigned:16384
+# cluster_known_nodes:6
+```
+
+## 📊 监控和管理
+
+### Web管理界面
+- **Redis Insight**: http://localhost:5540
+- **功能**: 可视化集群状态、数据浏览、性能监控
+
+### 指标监控
+- **Redis Exporter**: http://localhost:9121
+- **Prometheus指标**: 集群状态、性能指标、节点健康
+
+### 命令行管理
+```bash
+# 查看集群状态
+make status
+
+# 实时日志
+make logs
+
+# 性能测试
+make test
+
+# 数据备份
+make backup
+```
+
+## 🔒 安全配置
+
+### 网络安全
+- **隔离网络**: 专用Docker网络`redis-cluster-network`
+- **端口映射**: 仅必要端口对外暴露
+- **防火墙**: 建议配置防火墙规则
+
+### 认证授权
+- **密码保护**: 统一密码`redis123456`（生产环境请修改）
+- **访问控制**: 容器间通信限制
+
+### 数据安全
+- **数据持久化**: AOF + RDB双重保障
+- **定期备份**: 自动备份脚本
+- **加密传输**: 支持TLS（可选配置）
+
+## 🎛️ 配置定制
+
+### 修改密码
 ```yaml
-services:
-  redis-node-0到redis-node-5:
-    image: docker.io/bitnami/redis-cluster:7.4
-    environment:
-      - REDIS_PASSWORD=redis123456
-      - REDIS_NODES=all_nodes
-      - REDIS_CLUSTER_CREATOR=yes (仅node-5)
-      - REDIS_CLUSTER_REPLICAS=1 (仅node-5)
+# docker-compose.yml
+command: >
+  redis-server 
+  --requirepass YOUR_PASSWORD
+  --masterauth YOUR_PASSWORD
 ```
 
-#### 2. 无需手动配置文件
-- Bitnami镜像自动处理集群配置
-- 通过环境变量管理
-- 删除传统的config/目录
-
-#### 3. 增强管理脚本
-更新 `manage.sh` 包含：
-- cluster-info：显示集群详细信息
-- test：集群读写功能测试  
-- 支持6节点的备份和监控
-- 状态检查功能
-
-#### 4. 更新文档体系
-- `README.md` - 集群说明
-- `dev-examples.md` - 集群模式连接示例
-- `scaling-guide.md` - 集群扩展指南### 关键配置参数
-- Redis密码：`redis123456`
-- 集群节点：redis-node-0 到 redis-node-5
-- 网络名称：`redis-cluster-network`
-- 子网：`172.20.0.0/16`
-- 数据持久化：自动启用RDB和AOF
-- 集群副本数：1（每个主节点1个从节点）
-
-### 端口分配
-- 7000-7005：Redis Cluster节点
-- 17000-17005：Redis Cluster总线端口
-- 5540：Redis Insight管理界面
-- 9121：Redis Exporter监控
-
-### 主要特性
-- 自动集群初始化（无需手动cluster create）
-- 健康检查和自动重启
-- 容器间DNS自动发现
-- 数据卷持久化存储
-- 网络配置优化
-
-### 扩展性设计
-- 独立的Redis Cluster服务
-- 支持动态添加节点
-- 支持升级监控栈（Prometheus + Grafana）
-- 与其他服务（如MySQL）完全分离
-
-### 预期产出文件结构
-```
-RedisCluster/
-├── docker-compose.yml        # 集群配置
-├── manage.sh                 # 管理脚本
-├── README.md                 # 使用说明
-├── dev-examples.md          # 集群模式连接示例
-├── scaling-guide.md         # 集群扩展指南
-└── deployment-prompt.md     # 本部署提示词
+### 调整内存
+```yaml
+# docker-compose.yml
+deploy:
+  resources:
+    limits:
+      memory: 1G
 ```
 
-### 验证标准
-1. ✅ 6节点Redis Cluster成功启动
-2. ✅ 集群状态健康（cluster info显示ok）
-3. ✅ 数据分片正常工作（16384槽位分配）
-4. ✅ 故障转移功能正常
-5. ✅ Redis Insight可访问和管理
-6. ✅ 客户端连接示例可用
-7. ✅ 监控指标正常导出
-8. ✅ 数据持久化功能正常
+### 修改端口
+```yaml
+# docker-compose.yml
+ports:
+  - "YOUR_PORT:6379"
+```
 
-### ✨ 方案特点
-- 🐳 专业Bitnami镜像，生产级稳定性
-- 🔗 分布式Redis Cluster架构
-- 🎯 管理工具（Redis Insight）
-- 📊 完整可观测性支持（Prometheus）
-- ⚙️ 高度自动化，运维简单
-- 📈 支持在线动态扩缩容
-- 🐳 面向容器化环境
-- 🖥️ 适配Mac ARM + Orbstack
+## 🔄 升级和维护
 
-**✅ 此方案可直接用于生产环境部署。**
+### 滚动升级
+```bash
+# 停止集群
+make stop
+
+# 拉取新镜像
+docker pull redis:7.4
+
+# 重新启动
+make start
+```
+
+### 数据迁移
+```bash
+# 备份数据
+make backup
+
+# 迁移到新环境
+# 1. 部署新集群
+# 2. 恢复数据备份
+# 3. 验证数据完整性
+```
+
+### 扩容缩容
+```bash
+# 添加节点（需要修改配置）
+# 1. 更新docker-compose.yml
+# 2. 启动新节点
+# 3. 加入集群
+# 4. 重新分配槽位
+```
+
+## 🚨 故障排除
+
+详细的故障排除指南请参考 [troubleshooting.md](troubleshooting.md)
+
+### 常见问题
+- **端口冲突**: 检查端口占用
+- **内存不足**: 增加Docker内存限制
+- **集群创建失败**: 检查节点网络连通性
+- **数据丢失**: 恢复备份数据
+
+## 📞 技术支持
+
+- 📖 [项目文档](../README.md)
+- 🐛 [问题反馈](https://github.com/jigexiansen/redis-cluster/issues)
+- 💬 [讨论区](https://github.com/jigexiansen/redis-cluster/discussions)
