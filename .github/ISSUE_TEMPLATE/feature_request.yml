@@ -1,0 +1,57 @@
+name: ✨ Feature Request
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的建议！我们重视每一个改进想法。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🤔 Problem Description
+      description: 你遇到了什么问题？这个功能将如何帮助你？
+      placeholder: 描述问题或需求...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: 你希望看到什么解决方案？
+      placeholder: 描述你想要的功能...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: 你考虑过哪些其他解决方案？
+      placeholder: 描述其他可能的方案...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📊 Priority
+      description: 这个功能对你有多重要？
+      options:
+        - Low - Nice to have
+        - Medium - Would be helpful
+        - High - Important for my use case
+        - Critical - Blocking my work
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: 你愿意帮助实现这个功能吗？
+      options:
+        - label: 我愿意提交PR来实现这个功能
+        - label: 我可以帮助测试这个功能
+        - label: 我可以帮助写文档

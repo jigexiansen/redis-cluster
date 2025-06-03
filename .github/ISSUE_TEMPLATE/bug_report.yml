@@ -1,0 +1,68 @@
+name: 🐛 Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你报告这个问题！请提供以下信息帮助我们更好地理解和解决问题。
+
+  - type: input
+    id: environment
+    attributes:
+      label: 🖥️ Environment
+      description: 你的运行环境
+      placeholder: "例如: macOS 14.0, M2 Pro, OrbStack 1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: 🐛 Current Behavior
+      description: 描述当前发生的问题
+      placeholder: 告诉我们发生了什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: 描述你期望的正确行为
+      placeholder: 告诉我们应该发生什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: 重现问题的详细步骤
+      placeholder: |
+        1. 运行 'make start'
+        2. 访问 'http://localhost:5540'
+        3. 看到错误...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📝 Logs and Screenshots
+      description: 相关的日志输出或截图
+      placeholder: 粘贴日志或拖拽截图到这里...
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: 📦 Version
+      description: 你使用的版本
+      options:
+        - v1.0.0 (latest)
+        - main branch
+        - develop branch
+        - Other (please specify in description)
+    validations:
+      required: true
