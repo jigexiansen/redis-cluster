@@ -1,0 +1,54 @@
+# 🐳 Docker相关
+.env
+docker-compose.override.yml
+
+# 📊 监控和日志
+logs/
+*.log
+
+# 💾 备份文件
+backups/
+*.rdb
+*.aof
+
+# 🔧 临时文件
+tmp/
+temp/
+.tmp/
+
+# 💻 编辑器和IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 🖥️ 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🔑 密钥和配置
+*.key
+*.pem
+secrets/
+.secrets
+
+# 📦 依赖和缓存
+node_modules/
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# 📈 性能测试结果
+benchmark-results/
+performance-data/

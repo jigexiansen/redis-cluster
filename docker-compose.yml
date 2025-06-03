@@ -1,0 +1,199 @@
+# 🚀 Redis Cluster 配置 - 6节点集群(3主3从)
+# 🐳 基于Bitnami镜像，适用于Mac ARM + Orbstack环境
+
+services:
+  # 🔗 Redis集群节点 0-5 (3主3从)
+  redis-node-0:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-0
+    ports:
+      - "7000:6379"
+      - "17000:16379"
+    volumes:
+      - redis-cluster-data-0:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis-node-1:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-1
+    ports:
+      - "7001:6379"
+      - "17001:16379"
+    volumes:
+      - redis-cluster-data-1:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis-node-2:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-2
+    ports:
+      - "7002:6379"
+      - "17002:16379"
+    volumes:
+      - redis-cluster-data-2:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis-node-3:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-3
+    ports:
+      - "7003:6379"
+      - "17003:16379"
+    volumes:
+      - redis-cluster-data-3:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis-node-4:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-4
+    ports:
+      - "7004:6379"
+      - "17004:16379"
+    volumes:
+      - redis-cluster-data-4:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# ⚙️ 集群初始化节点 - 负责创建和配置集群
+  redis-node-5:
+    image: docker.io/bitnami/redis-cluster:7.4
+    container_name: redis-node-5
+    ports:
+      - "7005:6379"
+      - "17005:16379"
+    volumes:
+      - redis-cluster-data-5:/bitnami/redis/data
+    environment:
+      - REDIS_PASSWORD=redis123456
+      - REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5
+      - REDIS_CLUSTER_REPLICAS=1
+      - REDIS_CLUSTER_CREATOR=yes
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      - redis-cluster-network
+    depends_on:
+      - redis-node-0
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# 🎯 Redis Insight - Web管理界面
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis-insight-data:/data
+    networks:
+      - redis-cluster-network
+    depends_on:
+      redis-node-5:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - REDIS_INSIGHT_HOST=0.0.0.0
+      - REDIS_INSIGHT_PORT=5540
+
+# 📊 Redis Exporter - Prometheus监控指标导出
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis-node-0:6379
+      - REDIS_PASSWORD=redis123456
+    networks:
+      - redis-cluster-network
+    depends_on:
+      - redis-node-0
+    restart: unless-stopped
+    command: 
+      - '--redis.addr=redis://redis-node-0:6379'
+      - '--redis.password=redis123456'
+
+networks:
+  redis-cluster-network:
+    driver: bridge
+    name: redis-cluster-network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  redis-cluster-data-0:
+    driver: local
+  redis-cluster-data-1:
+    driver: local
+  redis-cluster-data-2:
+    driver: local
+  redis-cluster-data-3:
+    driver: local
+  redis-cluster-data-4:
+    driver: local
+  redis-cluster-data-5:
+    driver: local
+  redis-insight-data:
+    driver: local

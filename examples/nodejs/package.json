@@ -1,0 +1,16 @@
+{
+  "name": "redis-cluster-nodejs-example",
+  "version": "1.0.0",
+  "description": "🟢 Node.js Redis Cluster连接示例",
+  "main": "redis-cluster-example.js",
+  "scripts": {
+    "start": "node redis-cluster-example.js",
+    "test": "node test-cluster.js"
+  },
+  "dependencies": {
+    "redis": "^4.6.0"
+  },
+  "keywords": ["redis", "cluster", "nodejs"],
+  "author": "Redis Cluster Project",
+  "license": "MIT"
+}

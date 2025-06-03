@@ -1,0 +1,25 @@
+{
+    "name": "redis-cluster/php-example",
+    "description": "🐘 PHP Redis Cluster连接示例",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "predis/predis": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "RedisCluster\\": "src/"
+        }
+    },
+    "scripts": {
+        "test": "php redis-cluster-example.php"
+    },
+    "keywords": ["redis", "cluster", "php"],
+    "authors": [
+        {
+            "name": "Redis Cluster Project",
+            "email": "example@example.com"
+        }
+    ],
+    "license": "MIT"
+}
